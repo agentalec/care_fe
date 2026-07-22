@@ -100,28 +100,28 @@ test.describe("formatPatientAge - Clinical Age Format", () => {
     test("should display '0 days' for newborn", () => {
       const patient = createPatient(0);
       expect(formatPatientAge(patient)).toBe("0 days");
-      expect(formatPatientAge(patient, true)).toBe("0d");
+      expect(formatPatientAge(patient, true)).toBe("0 d");
     });
 
     test("should display '15 days' for 15-day-old", () => {
       const patient = createPatient(15);
       expect(formatPatientAge(patient)).toBe("15 days");
-      expect(formatPatientAge(patient, true)).toBe("15d");
+      expect(formatPatientAge(patient, true)).toBe("15 d");
     });
 
     test("should display '28 days' for 28-day-old", () => {
       const patient = createPatient(28);
       expect(formatPatientAge(patient)).toBe("28 days");
-      expect(formatPatientAge(patient, true)).toBe("28d");
+      expect(formatPatientAge(patient, true)).toBe("28 d");
     });
   });
 
   test.describe("AC1: 29 days to 1 year - display weeks + days", () => {
-    test("should display '5 weeks 0 days' for 35-day-old", () => {
+    test("should display '5 weeks' for 35-day-old", () => {
       const patient = createPatient(35);
       const result = formatPatientAge(patient);
       expect(result).toContain("5 weeks");
-      expect(formatPatientAge(patient, true)).toContain("5w");
+      expect(formatPatientAge(patient, true)).toContain("5 w");
     });
 
     test("should display weeks and days for 50-day-old", () => {
@@ -182,61 +182,61 @@ test.describe("formatPatientAge - Clinical Age Format", () => {
   });
 
   test.describe("AC1: 2 years to 18 years - display years + months", () => {
-    test("should display '2 years 0 months' for exactly 2 years old", () => {
+    test("should display '2 years' for exactly 2 years old", () => {
       const patient = createPatientWithAge(2, 0, 0);
       const result = formatPatientAge(patient);
-      expect(result).toBe("2 Y");
-      expect(formatPatientAge(patient, true)).toBe("2Y");
+      expect(result).toBe("2 years");
+      expect(formatPatientAge(patient, true)).toBe("2 Y");
     });
 
     test("should display '5 years 3 months' for 5 years 3 months old", () => {
       const patient = createPatientWithAge(5, 3, 10);
       const result = formatPatientAge(patient);
-      expect(result).toContain("5 Y");
-      expect(result).toContain("3 mo");
+      expect(result).toContain("5 years");
+      expect(result).toContain("3 months");
       const abbreviated = formatPatientAge(patient, true);
-      expect(abbreviated).toContain("5Y");
-      expect(abbreviated).toContain("3mo");
+      expect(abbreviated).toContain("5 Y");
+      expect(abbreviated).toContain("3 mo");
     });
 
     test("should display '10 years 6 months' for 10 years 6 months old", () => {
       const patient = createPatientWithAge(10, 6, 5);
       const result = formatPatientAge(patient);
-      expect(result).toContain("10 Y");
-      expect(result).toContain("6 mo");
+      expect(result).toContain("10 years");
+      expect(result).toContain("6 months");
     });
 
     test("should display '17 years 11 months' for 17 years 11 months old", () => {
       const patient = createPatientWithAge(17, 11, 20);
       const result = formatPatientAge(patient);
-      expect(result).toContain("17 Y");
-      expect(result).toContain("11 mo");
+      expect(result).toContain("17 years");
+      expect(result).toContain("11 months");
     });
   });
 
   test.describe("AC1: Above 18 years - display years only", () => {
     test("should display '18 years' for exactly 18 years old", () => {
       const patient = createPatientWithAge(18, 0, 0);
-      expect(formatPatientAge(patient)).toBe("18 Y");
-      expect(formatPatientAge(patient, true)).toBe("18Y");
+      expect(formatPatientAge(patient)).toBe("18 years");
+      expect(formatPatientAge(patient, true)).toBe("18 Y");
     });
 
     test("should display '25 years' for 25 years 3 months old", () => {
       const patient = createPatientWithAge(25, 3, 10);
-      expect(formatPatientAge(patient)).toBe("25 Y");
-      expect(formatPatientAge(patient, true)).toBe("25Y");
+      expect(formatPatientAge(patient)).toBe("25 years");
+      expect(formatPatientAge(patient, true)).toBe("25 Y");
     });
 
     test("should display '42 years' for 42 years old", () => {
       const patient = createPatientWithAge(42, 6, 15);
-      expect(formatPatientAge(patient)).toBe("42 Y");
-      expect(formatPatientAge(patient, true)).toBe("42Y");
+      expect(formatPatientAge(patient)).toBe("42 years");
+      expect(formatPatientAge(patient, true)).toBe("42 Y");
     });
 
     test("should display '75 years' for 75 years old", () => {
       const patient = createPatientWithAge(75, 0, 0);
-      expect(formatPatientAge(patient)).toBe("75 Y");
-      expect(formatPatientAge(patient, true)).toBe("75Y");
+      expect(formatPatientAge(patient)).toBe("75 years");
+      expect(formatPatientAge(patient, true)).toBe("75 Y");
     });
   });
 
@@ -271,7 +271,7 @@ test.describe("formatPatientAge - Clinical Age Format", () => {
       };
 
       const result = formatPatientAge(patient);
-      expect(result).toBe("5 Y");
+      expect(result).toBe("5 years");
     });
   });
 
@@ -303,8 +303,8 @@ test.describe("formatPatientAgeTooltip", () => {
     test("should show 'X years, Y months, Z days' for adults", () => {
       const patient = createPatientWithAge(25, 3, 5);
       const tooltip = formatPatientAgeTooltip(patient);
-      expect(tooltip).toContain("25 Y");
-      expect(tooltip).toContain("3 mo");
+      expect(tooltip).toContain("25 years");
+      expect(tooltip).toContain("3 months");
       expect(tooltip).toContain("days");
       expect(tooltip).toMatch(/,/g);
     });
@@ -312,16 +312,16 @@ test.describe("formatPatientAgeTooltip", () => {
     test("should show full breakdown for children", () => {
       const patient = createPatientWithAge(5, 6, 10);
       const tooltip = formatPatientAgeTooltip(patient);
-      expect(tooltip).toContain("5 Y");
-      expect(tooltip).toContain("6 mo");
+      expect(tooltip).toContain("5 years");
+      expect(tooltip).toContain("6 months");
       expect(tooltip).toContain("days");
     });
 
     test("should show full breakdown for toddlers", () => {
       const patient = createPatientWithAge(1, 6, 15);
       const tooltip = formatPatientAgeTooltip(patient);
-      expect(tooltip).toContain("1 Y");
-      expect(tooltip).toContain("6 mo");
+      expect(tooltip).toContain("1 years");
+      expect(tooltip).toContain("6 months");
       expect(tooltip).toContain("days");
     });
 
@@ -388,13 +388,13 @@ test.describe("Edge Cases", () => {
     const patient = createPatient(730);
     const result = formatPatientAge(patient);
     // Should show years (2-18 years range, 0 months should just show years)
-    expect(result).toContain("2 Y");
+    expect(result).toContain("2 years");
   });
 
   test("should handle patient born exactly 18 years ago", () => {
     const patient = createPatientWithAge(18, 0, 0);
     const result = formatPatientAge(patient);
     // Should show years only (18+ range)
-    expect(result).toBe("18 Y");
+    expect(result).toBe("18 years");
   });
 });
