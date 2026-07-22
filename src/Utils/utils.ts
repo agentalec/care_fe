@@ -140,11 +140,81 @@ export const isValidLongitude = (longitude: number) => {
 const getRelativeDateSuffix = (abbreviated: boolean) => {
   return {
     day: abbreviated ? "d" : "days",
+    week: abbreviated ? "w" : "weeks",
     month: abbreviated ? "mo" : "months",
     year: abbreviated ? "Y" : "years",
   };
 };
 
+/**
+ * Get the full age breakdown in years, months, and days
+ * @param obj Patient object with date_of_birth
+ * @returns Object with years, months, and days
+ */
+export const getPatientAgeBreakdown = (
+  obj: PatientRead | PatientListRead | PublicPatientRead,
+) => {
+  const start = dayjs(
+    obj.date_of_birth
+      ? new Date(obj.date_of_birth)
+      : new Date(obj.year_of_birth!, 0, 1),
+  );
+
+  const end =
+    "deceased_datetime" in obj && obj.deceased_datetime
+      ? dayjs(new Date(obj.deceased_datetime))
+      : dayjs(new Date());
+
+  const years = end.diff(start, "years");
+  const months = end.diff(start.add(years, "years"), "months");
+  const days = end.diff(
+    start.add(years, "years").add(months, "months"),
+    "days",
+  );
+
+  return { years, months, days };
+};
+
+/**
+ * Get the full age breakdown as a formatted string for tooltips
+ * Always shows "X years, Y months, Z days" format
+ * @param obj Patient object
+ * @param abbreviated Use abbreviated format
+ * @returns Formatted age breakdown string
+ */
+export const formatPatientAgeTooltip = (
+  obj: PatientRead | PatientListRead | PublicPatientRead,
+  abbreviated = false,
+) => {
+  // Handle year-of-birth-only patients
+  if (!obj.date_of_birth) {
+    return abbreviated
+      ? `Born ${obj.year_of_birth}`
+      : `Born on ${obj.year_of_birth}`;
+  }
+
+  const { years, months, days } = getPatientAgeBreakdown(obj);
+  const suffixes = getRelativeDateSuffix(abbreviated);
+
+  const parts = [];
+  if (years > 0) parts.push(`${years} ${suffixes.year}`);
+  if (months > 0) parts.push(`${months} ${suffixes.month}`);
+  if (days > 0 || parts.length === 0) parts.push(`${days} ${suffixes.day}`);
+
+  return parts.join(", ");
+};
+
+/**
+ * Format patient age using clinical age-format rules
+ * - 0-28 days: Show days only
+ * - 29 days to 1 year: Show weeks + days
+ * - 1 year to 2 years: Show months + days
+ * - 2 years to 18 years: Show years + months
+ * - Above 18 years: Show years only
+ * @param obj Patient object
+ * @param abbreviated Use abbreviated format
+ * @returns Formatted age string
+ */
 export const formatPatientAge = (
   obj: PatientRead | PatientListRead | PublicPatientRead,
   abbreviated = false,
@@ -161,11 +231,6 @@ export const formatPatientAge = (
       ? dayjs(new Date(obj.deceased_datetime))
       : dayjs(new Date());
 
-  const years = end.diff(start, "years");
-  if (years) {
-    return `${years} ${suffixes.year}`;
-  }
-
   // Skip representing as no. of months/days if we don't know the date of birth
   // since it would anyways be inaccurate.
   if (!obj.date_of_birth) {
@@ -174,12 +239,44 @@ export const formatPatientAge = (
       : `Born on ${obj.year_of_birth}`;
   }
 
-  const month = end.diff(start, "month");
-  const day = end.diff(start.add(month, "month"), "day");
-  if (month) {
-    return `${month}${suffixes.month} ${day}${suffixes.day}`;
+  const totalDays = end.diff(start, "days");
+  const { years, months } = getPatientAgeBreakdown(obj);
+
+  // 0-28 days: Show days only
+  if (totalDays <= 28) {
+    return `${totalDays} ${suffixes.day}`;
   }
-  return `${day}${suffixes.day}`;
+
+  // 29 days to 1 year: Show weeks + days
+  if (totalDays < 365) {
+    const weeks = Math.floor(totalDays / 7);
+    const remainingDays = totalDays % 7;
+    if (remainingDays === 0) {
+      return `${weeks} ${suffixes.week}`;
+    }
+    return `${weeks} ${suffixes.week} ${remainingDays} ${suffixes.day}`;
+  }
+
+  // 1 year to 2 years: Show months + days
+  if (years < 2) {
+    const totalMonths = end.diff(start, "months");
+    const remainingDays = end.diff(start.add(totalMonths, "months"), "days");
+    if (remainingDays === 0) {
+      return `${totalMonths} ${suffixes.month}`;
+    }
+    return `${totalMonths} ${suffixes.month} ${remainingDays} ${suffixes.day}`;
+  }
+
+  // 2 years to 18 years: Show years + months
+  if (years < 18) {
+    if (months === 0) {
+      return `${years} ${suffixes.year}`;
+    }
+    return `${years} ${suffixes.year} ${months} ${suffixes.month}`;
+  }
+
+  // Above 18 years: Show years only
+  return `${years} ${suffixes.year}`;
 };
 
 /**

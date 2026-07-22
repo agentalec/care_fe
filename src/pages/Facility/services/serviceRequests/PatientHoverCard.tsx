@@ -6,13 +6,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { TooltipComponent } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import {
   PatientListRead,
   PatientRead,
   PublicPatientRead,
 } from "@/types/emr/patient/patient";
-import { formatPatientAge } from "@/Utils/utils";
+import { formatPatientAge, formatPatientAgeTooltip } from "@/Utils/utils";
 import { ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -104,7 +105,12 @@ function PatientHoverCardTrigger({
           {!disabled && <ChevronDown size={16} />}
         </div>
         <span className="flex flex-start text-gray-700">
-          {formatPatientAge(patient, true)}, {t(`GENDER__${patient.gender}`)}
+          <TooltipComponent content={formatPatientAgeTooltip(patient, true)}>
+            <span className="cursor-help">
+              {formatPatientAge(patient, true)}
+            </span>
+          </TooltipComponent>
+          , {t(`GENDER__${patient.gender}`)}
         </span>
       </div>
     </div>
