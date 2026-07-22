@@ -137,13 +137,36 @@ export const isValidLongitude = (longitude: number) => {
   return Number.isFinite(longitude) && longitude >= -180 && longitude <= 180;
 };
 
-const getRelativeDateSuffix = (abbreviated: boolean) => {
-  return {
-    day: abbreviated ? "d" : "days",
-    week: abbreviated ? "w" : "weeks",
-    month: abbreviated ? "mo" : "months",
-    year: abbreviated ? "Y" : "years",
+const getRelativeDateSuffix = (
+  count: number,
+  unit: "day" | "week" | "month" | "year",
+  abbreviated: boolean,
+) => {
+  if (abbreviated) {
+    const abbr = {
+      day: "d",
+      week: "w",
+      month: "mo",
+      year: "Y",
+    };
+    return abbr[unit];
+  }
+
+  const singular = {
+    day: "day",
+    week: "week",
+    month: "month",
+    year: "year",
   };
+
+  const plural = {
+    day: "days",
+    week: "weeks",
+    month: "months",
+    year: "years",
+  };
+
+  return count === 1 ? singular[unit] : plural[unit];
 };
 
 /**
@@ -194,12 +217,16 @@ export const formatPatientAgeTooltip = (
   }
 
   const { years, months, days } = getPatientAgeBreakdown(obj);
-  const suffixes = getRelativeDateSuffix(abbreviated);
 
   const parts = [];
-  if (years > 0) parts.push(`${years} ${suffixes.year}`);
-  if (months > 0) parts.push(`${months} ${suffixes.month}`);
-  if (days > 0 || parts.length === 0) parts.push(`${days} ${suffixes.day}`);
+  if (years > 0)
+    parts.push(`${years} ${getRelativeDateSuffix(years, "year", abbreviated)}`);
+  if (months > 0)
+    parts.push(
+      `${months} ${getRelativeDateSuffix(months, "month", abbreviated)}`,
+    );
+  if (days > 0 || parts.length === 0)
+    parts.push(`${days} ${getRelativeDateSuffix(days, "day", abbreviated)}`);
 
   return parts.join(", ");
 };
@@ -219,7 +246,6 @@ export const formatPatientAge = (
   obj: PatientRead | PatientListRead | PublicPatientRead,
   abbreviated = false,
 ) => {
-  const suffixes = getRelativeDateSuffix(abbreviated);
   const start = dayjs(
     obj.date_of_birth
       ? new Date(obj.date_of_birth)
@@ -244,7 +270,7 @@ export const formatPatientAge = (
 
   // 0-28 days: Show days only
   if (totalDays <= 28) {
-    return `${totalDays} ${suffixes.day}`;
+    return `${totalDays} ${getRelativeDateSuffix(totalDays, "day", abbreviated)}`;
   }
 
   // 29 days to 1 year: Show weeks + days
@@ -252,9 +278,9 @@ export const formatPatientAge = (
     const weeks = Math.floor(totalDays / 7);
     const remainingDays = totalDays % 7;
     if (remainingDays === 0) {
-      return `${weeks} ${suffixes.week}`;
+      return `${weeks} ${getRelativeDateSuffix(weeks, "week", abbreviated)}`;
     }
-    return `${weeks} ${suffixes.week} ${remainingDays} ${suffixes.day}`;
+    return `${weeks} ${getRelativeDateSuffix(weeks, "week", abbreviated)} ${remainingDays} ${getRelativeDateSuffix(remainingDays, "day", abbreviated)}`;
   }
 
   // 1 year to 2 years: Show months + days
@@ -262,21 +288,21 @@ export const formatPatientAge = (
     const totalMonths = end.diff(start, "months");
     const remainingDays = end.diff(start.add(totalMonths, "months"), "days");
     if (remainingDays === 0) {
-      return `${totalMonths} ${suffixes.month}`;
+      return `${totalMonths} ${getRelativeDateSuffix(totalMonths, "month", abbreviated)}`;
     }
-    return `${totalMonths} ${suffixes.month} ${remainingDays} ${suffixes.day}`;
+    return `${totalMonths} ${getRelativeDateSuffix(totalMonths, "month", abbreviated)} ${remainingDays} ${getRelativeDateSuffix(remainingDays, "day", abbreviated)}`;
   }
 
   // 2 years to 18 years: Show years + months
   if (years < 18) {
     if (months === 0) {
-      return `${years} ${suffixes.year}`;
+      return `${years} ${getRelativeDateSuffix(years, "year", abbreviated)}`;
     }
-    return `${years} ${suffixes.year} ${months} ${suffixes.month}`;
+    return `${years} ${getRelativeDateSuffix(years, "year", abbreviated)} ${months} ${getRelativeDateSuffix(months, "month", abbreviated)}`;
   }
 
   // Above 18 years: Show years only
-  return `${years} ${suffixes.year}`;
+  return `${years} ${getRelativeDateSuffix(years, "year", abbreviated)}`;
 };
 
 /**

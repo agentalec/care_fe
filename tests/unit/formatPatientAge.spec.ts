@@ -1,11 +1,11 @@
 import { expect, test } from "@playwright/test";
 
-import dayjs from "@/Utils/dayjs";
+import dayjs from "../src/Utils/dayjs";
 import {
   formatPatientAge,
   formatPatientAgeTooltip,
   getPatientAgeBreakdown,
-} from "@/Utils/utils";
+} from "../src/Utils/utils";
 
 // Helper to create a patient object with date_of_birth
 const createPatient = (daysOld: number, deceased = false) => {
@@ -109,6 +109,12 @@ test.describe("formatPatientAge - Clinical Age Format", () => {
       expect(formatPatientAge(patient, true)).toBe("15 d");
     });
 
+    test("should display '1 day' (singular) for 1-day-old", () => {
+      const patient = createPatient(1);
+      expect(formatPatientAge(patient)).toBe("1 day");
+      expect(formatPatientAge(patient, true)).toBe("1 d");
+    });
+
     test("should display '28 days' for 28-day-old", () => {
       const patient = createPatient(28);
       expect(formatPatientAge(patient)).toBe("28 days");
@@ -122,6 +128,12 @@ test.describe("formatPatientAge - Clinical Age Format", () => {
       const result = formatPatientAge(patient);
       expect(result).toContain("5 weeks");
       expect(formatPatientAge(patient, true)).toContain("5 w");
+    });
+
+    test("should display '1 week' (singular) for 7-day-old", () => {
+      const patient = createPatient(7);
+      expect(formatPatientAge(patient)).toBe("1 week");
+      expect(formatPatientAge(patient, true)).toBe("1 w");
     });
 
     test("should display weeks and days for 50-day-old", () => {
@@ -156,6 +168,13 @@ test.describe("formatPatientAge - Clinical Age Format", () => {
   });
 
   test.describe("AC1: 1 year to 2 years - display months + days", () => {
+    test("should display '12 months 0 days' for exactly 1 year old", () => {
+      const patient = createPatientWithAge(1, 0, 0);
+      const result = formatPatientAge(patient);
+      expect(result).toBe("12 months");
+      expect(formatPatientAge(patient, true)).toBe("12 mo");
+    });
+
     test("should display '13 months X days' for 13-month-old", () => {
       const patient = createPatientWithAge(1, 1, 5);
       const result = formatPatientAge(patient);
@@ -197,6 +216,13 @@ test.describe("formatPatientAge - Clinical Age Format", () => {
       const abbreviated = formatPatientAge(patient, true);
       expect(abbreviated).toContain("5 Y");
       expect(abbreviated).toContain("3 mo");
+    });
+
+    test("should display '3 years 1 month' (singular) for 3 years 1 month old", () => {
+      const patient = createPatientWithAge(3, 1, 10);
+      const result = formatPatientAge(patient);
+      expect(result).toBe("3 years 1 month");
+      expect(formatPatientAge(patient, true)).toBe("3 Y 1 mo");
     });
 
     test("should display '10 years 6 months' for 10 years 6 months old", () => {
@@ -320,7 +346,7 @@ test.describe("formatPatientAgeTooltip", () => {
     test("should show full breakdown for toddlers", () => {
       const patient = createPatientWithAge(1, 6, 15);
       const tooltip = formatPatientAgeTooltip(patient);
-      expect(tooltip).toContain("1 years");
+      expect(tooltip).toContain("1 year");
       expect(tooltip).toContain("6 months");
       expect(tooltip).toContain("days");
     });
