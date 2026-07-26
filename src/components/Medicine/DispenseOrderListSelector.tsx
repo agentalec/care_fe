@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import * as React from "react";
+import { useInView } from "react-intersection-observer";
 
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { Button } from "@/components/ui/button";
@@ -19,7 +20,6 @@ import { PaginatedResponse } from "@/Utils/request/types";
 import { formatDateTime } from "@/Utils/utils";
 import { ChevronDown, PackageIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useInView } from "react-intersection-observer";
 
 interface DispenseOrderListSelectorProps {
   patientId: string;
@@ -72,7 +72,7 @@ export default function DispenseOrderListSelector({
   React.useEffect(() => {
     if (dispenseOrders.length) {
       if (!selectedDispenseOrderId) {
-        onSelectDispenseOrder(dispenseOrders[0] as DispenseOrderRead);
+        onSelectDispenseOrder(dispenseOrders[0]);
       }
     } else {
       onSelectDispenseOrder(undefined);
