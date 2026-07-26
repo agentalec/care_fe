@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
+import { HighlightedDosage } from "@/components/Medicine/HighlightedDosage";
 import { getDosageFromInstruction } from "@/components/Medicine/MedicationAdministration/utils";
 import {
   formatDosage,
@@ -116,7 +117,11 @@ const DosageInstructionSelector: React.FC<DosageInstructionSelectorProps> = ({
           >
             <div>
               <Label className="text-xs text-gray-500">{t("dosage")}</Label>
-              <p className="font-medium">{formatDosage(di)}</p>
+              <p className="font-medium">
+                <HighlightedDosage instruction={di}>
+                  {formatDosage(di)}
+                </HighlightedDosage>
+              </p>
             </div>
             <div>
               <Label className="text-xs text-gray-500">{t("frequency")}</Label>
@@ -165,7 +170,11 @@ const DosageInstructionSelector: React.FC<DosageInstructionSelectorProps> = ({
               <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
                   <Label className="text-xs text-gray-500">{t("dosage")}</Label>
-                  <p className="font-medium">{formatDosage(di)}</p>
+                  <p className="font-medium">
+                    <HighlightedDosage instruction={di}>
+                      {formatDosage(di)}
+                    </HighlightedDosage>
+                  </p>
                 </div>
                 <div>
                   <Label className="text-xs text-gray-500">

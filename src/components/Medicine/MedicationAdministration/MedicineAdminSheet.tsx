@@ -27,6 +27,8 @@ import {
   displayMedicationName,
 } from "@/types/emr/medicationRequest/medicationRequest";
 
+import { HighlightedDosage } from "@/components/Medicine/HighlightedDosage";
+import { formatDosage } from "@/components/Medicine/utils";
 import { MedicineAdminForm } from "./MedicineAdminForm";
 import {
   GroupedMedication,
@@ -81,6 +83,20 @@ const MedicineListItem = ({
               </span>
             )}
           </div>
+          {medicine.dosage_instruction.length > 0 && (
+            <div className="text-sm text-gray-600 flex flex-wrap gap-2">
+              {medicine.dosage_instruction.map((di, idx) => {
+                const dosage = formatDosage(di);
+                return dosage ? (
+                  <span key={idx}>
+                    <HighlightedDosage instruction={di}>
+                      {dosage}
+                    </HighlightedDosage>
+                  </span>
+                ) : null;
+              })}
+            </div>
+          )}
         </div>
         <div className="mt-1 mr-6">
           <Checkbox

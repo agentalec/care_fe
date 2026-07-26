@@ -19,7 +19,11 @@ import {
 
 import Loading from "@/components/Common/Loading";
 import PrintFooter from "@/components/Common/PrintFooter";
-import { formatDosage, formatFrequency } from "@/components/Medicine/utils";
+import {
+  formatDosage,
+  formatFrequency,
+  shouldHighlightDosage,
+} from "@/components/Medicine/utils";
 
 import useCurrentFacilitySilently from "@/pages/Facility/utils/useCurrentFacility";
 import encounterApi from "@/types/emr/encounter/encounterApi";
@@ -503,11 +507,15 @@ const DrugChartTable = ({
                   </div>
                   {instructions.map((di, idx) => {
                     const doseText = formatDosage(di);
+                    // Add warning icon for non-standard dosages (print-safe)
+                    const dosage = shouldHighlightDosage(di)
+                      ? `⚠ ${doseText}`
+                      : doseText;
                     const routeText = di.route?.display;
                     const frequencyText = isPRN
                       ? t("as_needed")
                       : formatFrequency(di);
-                    const summary = [doseText, routeText, frequencyText]
+                    const summary = [dosage, routeText, frequencyText]
                       .filter(Boolean)
                       .join(" · ");
                     return summary ? (
