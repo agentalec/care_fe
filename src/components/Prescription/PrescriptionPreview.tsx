@@ -15,6 +15,7 @@ import {
   formatDuration,
   formatFrequencyWithInstructions,
   formatSig,
+  shouldHighlightDosage,
 } from "@/components/Medicine/utils";
 
 import query from "@/Utils/request/query";
@@ -65,17 +66,29 @@ const PrescriptionContent = ({
             rows={medications.flatMap((medication) => {
               const instructions = medication.dosage_instruction;
               const isMulti = instructions.length > 1;
-              return instructions.map((di, idx) => ({
-                _groupedRow:
-                  isMulti && idx < instructions.length - 1 ? "true" : undefined,
-                medicine: idx === 0 ? displayMedicationName(medication) : "",
-                dosage: formatDosage(di) || "-",
-                frequency: formatFrequencyWithInstructions(di) || "-",
-                duration: formatDuration(di) || "-",
-                instructions: [formatSig(di), idx === 0 ? medication.note : ""]
-                  .filter(Boolean)
-                  .join("\n"),
-              }));
+              return instructions.map((di, idx) => {
+                const dosageText = formatDosage(di) || "-";
+                // Add visual marker for non-standard dosages (print-safe)
+                const dosage = shouldHighlightDosage(di)
+                  ? `⚠ ${dosageText}`
+                  : dosageText;
+                return {
+                  _groupedRow:
+                    isMulti && idx < instructions.length - 1
+                      ? "true"
+                      : undefined,
+                  medicine: idx === 0 ? displayMedicationName(medication) : "",
+                  dosage,
+                  frequency: formatFrequencyWithInstructions(di) || "-",
+                  duration: formatDuration(di) || "-",
+                  instructions: [
+                    formatSig(di),
+                    idx === 0 ? medication.note : "",
+                  ]
+                    .filter(Boolean)
+                    .join("\n"),
+                };
+              });
             })}
             className="text-sm break-words font-semibold whitespace-break-spaces text-gray-950"
             cellConfig={{

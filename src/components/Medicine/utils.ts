@@ -7,6 +7,36 @@ import {
 } from "@/types/emr/medicationRequest/medicationRequest";
 import { round } from "@/Utils/decimal";
 
+/**
+ * Determines if a dosage should be highlighted because it's not equal to 1.
+ * Highlights non-standard dosages to prevent nurses from overlooking them.
+ *
+ * @param instruction - The dosage instruction to check
+ * @returns true if the dosage should be highlighted (value != 1), false otherwise
+ */
+export function shouldHighlightDosage(
+  instruction?: MedicationRequestDosageInstruction,
+): boolean {
+  if (!instruction?.dose_and_rate) return false;
+
+  const { dose_range, dose_quantity } = instruction.dose_and_rate;
+
+  // Check dose_range: highlight if either low or high value is not 1
+  if (dose_range) {
+    const lowValue = parseFloat(dose_range.low.value);
+    const highValue = parseFloat(dose_range.high.value);
+    return lowValue !== 1 || highValue !== 1;
+  }
+
+  // Check dose_quantity: highlight if value is not 1
+  if (dose_quantity) {
+    const value = parseFloat(dose_quantity.value);
+    return value !== 1;
+  }
+
+  return false;
+}
+
 // Helper function to format dosage in Rx style
 export function formatDosage(instruction?: MedicationRequestDosageInstruction) {
   if (!instruction?.dose_and_rate) return "";

@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/tooltip";
 
 import { DosageInstructionList } from "@/components/Medicine/DosageInstructionList";
+import { HighlightedDosage } from "@/components/Medicine/HighlightedDosage";
 import { formatDosage, formatFrequency } from "@/components/Medicine/utils";
 
 import { MedicationAdministrationRead } from "@/types/emr/medicationAdministration/medicationAdministration";
@@ -109,16 +110,20 @@ const IndividualMedicationRow: React.FC<{
             )}
             gap="sm"
             renderItem={(di) => {
-              const text = [
-                formatDosage(di),
-                formatFrequency(di),
-                di.method?.display,
-              ]
-                .filter(Boolean)
-                .join(", ");
+              const dosage = formatDosage(di);
+              const frequency = formatFrequency(di);
+              const method = di.method?.display;
+              const parts = [frequency, method].filter(Boolean);
               return (
                 <div>
-                  {text && <div>{text}</div>}
+                  {dosage && (
+                    <div>
+                      <HighlightedDosage instruction={di}>
+                        {dosage}
+                      </HighlightedDosage>
+                      {parts.length > 0 && <span>, {parts.join(", ")}</span>}
+                    </div>
+                  )}
                   {di.route?.display && (
                     <Badge variant="blue" className="text-xs mt-0.5">
                       {di.route.display}
@@ -346,17 +351,27 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
                   itemClassName="text-sm text-gray-600"
                   gap="sm"
                   renderItem={(di) => {
+                    const dosage = formatDosage(di);
                     const freq = formatFrequency(di);
+                    const method = di.method?.display;
                     return (
                       <div>
                         <div>
-                          {formatDosage(di)}
-                          {freq && <span className="text-gray-400"> · </span>}
+                          {dosage && (
+                            <>
+                              <HighlightedDosage instruction={di}>
+                                {dosage}
+                              </HighlightedDosage>
+                              {(freq || method) && (
+                                <span className="text-gray-400"> · </span>
+                              )}
+                            </>
+                          )}
                           {freq}
-                          {di.method?.display && (
+                          {method && (
                             <>
                               <span className="text-gray-400"> · </span>
-                              {di.method.display}
+                              {method}
                             </>
                           )}
                         </div>
