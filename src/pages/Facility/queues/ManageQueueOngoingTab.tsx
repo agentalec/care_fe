@@ -30,6 +30,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import useBreakpoints from "@/hooks/useBreakpoints";
 import { cn } from "@/lib/utils";
 import { OngoingQueueTokenCardsList } from "@/pages/Facility/queues/OngoingQueueTokenCard";
 import { usePreferredServicePointCategory } from "@/pages/Facility/queues/usePreferredServicePointCategory";
@@ -72,7 +73,22 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
     "waiting",
   );
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [mobileSelectedServicePointId, setMobileSelectedServicePointId] =
+    useState<string | null>(null);
   const activeFilterCount = [search, patient].filter(Boolean).length;
+  const isMobile = useBreakpoints({ default: true, lg: false });
+
+  // Set default mobile selection to first assigned service point
+  const effectiveMobileServicePointId =
+    mobileSelectedServicePointId ?? assignedServicePoints[0]?.id ?? null;
+
+  // Filter service points based on viewport
+  const displayedServicePoints =
+    isMobile && effectiveMobileServicePointId
+      ? assignedServicePoints.filter(
+          (sp) => sp.id === effectiveMobileServicePointId,
+        )
+      : assignedServicePoints;
   const { data: summary } = useQuery({
     queryKey: ["token-queue-summary", facilityId, queueId],
     queryFn: query(tokenQueueApi.summary, {
@@ -192,20 +208,34 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
           <QueueColumn
             title={t("called_plus_now_serving")}
             options={
-              summary && (
-                <AwaitingRecallTrigger
-                  queueId={queueId}
-                  facilityId={facilityId}
-                  count={getTokenQueueStatusCount(
-                    summary,
-                    TokenStatus.UNFULFILLED,
-                  )}
-                />
-              )
+              <>
+                {/* Desktop: Service points dropdown */}
+                <div className="hidden lg:block">
+                  <ServicePointsDropDown />
+                </div>
+                {/* Mobile: Single service point selector */}
+                {isMobile && assignedServicePoints.length > 0 && (
+                  <MobileServicePointSelector
+                    servicePoints={assignedServicePoints}
+                    selectedId={effectiveMobileServicePointId}
+                    onSelect={setMobileSelectedServicePointId}
+                  />
+                )}
+                {summary && (
+                  <AwaitingRecallTrigger
+                    queueId={queueId}
+                    facilityId={facilityId}
+                    count={getTokenQueueStatusCount(
+                      summary,
+                      TokenStatus.UNFULFILLED,
+                    )}
+                  />
+                )}
+              </>
             }
           >
             <div className="flex flex-col gap-4">
-              {assignedServicePoints.map((subQueue, index) => (
+              {displayedServicePoints.map((subQueue, index) => (
                 <div key={subQueue.id} className="flex flex-col gap-4">
                   {index > 0 && (
                     <hr className="h-px w-full border border-gray-300 border-dashed" />
@@ -304,60 +334,106 @@ function FilterControls({
 }) {
   const { t } = useTranslation();
   return (
-    <>
-      <div className="flex flex-col gap-2 w-full">
-        {!hideSearchLabel && (
-          <Label className="text-gray-950 text-sm font-medium">
-            {t("search_patients")}
-          </Label>
-        )}
-        <div className="flex flex-col sm:flex-row gap-2">
-          <div className="relative w-full sm:w-64">
-            <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
-            <Input
-              type="search"
-              placeholder={t("search_by_patient_name")}
-              value={search || ""}
-              onChange={(e) =>
-                setQueryParams(
-                  { search: e.target.value || "" },
-                  { overwrite: false, replace: true },
-                )
-              }
-              className="pl-10 w-full h-9"
-            />
-          </div>
-          <PatientIdentifierFilter
-            onSelect={(patientId, patientNameVal) => {
-              if (patientId && patientNameVal) {
-                setQueryParams(
-                  {
-                    patient: patientId,
-                    patient_name: patientNameVal,
-                  },
-                  { overwrite: false, replace: true },
-                );
-              } else {
-                const next = { ...qParams };
-                delete next.patient;
-                delete next.patient_name;
-                setQueryParams(next, { replace: true });
-              }
-            }}
-            placeholder={t("filter_by_identifier")}
-            className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
-            patientId={patient}
-            patientName={patientName}
+    <div className="flex flex-col gap-2 w-full">
+      {!hideSearchLabel && (
+        <Label className="text-gray-950 text-sm font-medium">
+          {t("search_patients")}
+        </Label>
+      )}
+      <div className="flex flex-col sm:flex-row gap-2">
+        <div className="relative w-full sm:w-64">
+          <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
+          <Input
+            type="search"
+            placeholder={t("search_by_patient_name")}
+            value={search || ""}
+            onChange={(e) =>
+              setQueryParams(
+                { search: e.target.value || "" },
+                { overwrite: false, replace: true },
+              )
+            }
+            className="pl-10 w-full h-9"
           />
         </div>
+        <PatientIdentifierFilter
+          onSelect={(patientId, patientNameVal) => {
+            if (patientId && patientNameVal) {
+              setQueryParams(
+                {
+                  patient: patientId,
+                  patient_name: patientNameVal,
+                },
+                { overwrite: false, replace: true },
+              );
+            } else {
+              const next = { ...qParams };
+              delete next.patient;
+              delete next.patient_name;
+              setQueryParams(next, { replace: true });
+            }
+          }}
+          placeholder={t("filter_by_identifier")}
+          className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
+          patientId={patient}
+          patientName={patientName}
+        />
       </div>
-      <div className="pt-3 lg:pt-0 flex flex-col gap-2 w-full lg:w-auto lg:max-w-[55%] lg:items-end min-w-0">
-        <Label className="text-gray-950 text-sm font-medium">
-          {t("service_points")}
-        </Label>
-        <ServicePointsDropDown />
-      </div>
-    </>
+    </div>
+  );
+}
+
+function MobileServicePointSelector({
+  servicePoints,
+  selectedId,
+  onSelect,
+}: {
+  servicePoints: { id: string; name: string }[];
+  selectedId: string | null;
+  onSelect: (id: string) => void;
+}) {
+  const { t } = useTranslation();
+  const [isOpen, setIsOpen] = useState(false);
+
+  const selectedServicePoint = servicePoints.find((sp) => sp.id === selectedId);
+
+  return (
+    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-8 px-3 gap-2 border-gray-300"
+        >
+          <span className="text-sm font-medium truncate max-w-[150px]">
+            {selectedServicePoint?.name || t("select_service_point")}
+          </span>
+          <ChevronDownIcon className="size-4 shrink-0" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-64">
+        <div className="flex flex-col gap-1 p-1">
+          {servicePoints.map((sp) => (
+            <button
+              key={sp.id}
+              onClick={() => {
+                onSelect(sp.id);
+                setIsOpen(false);
+              }}
+              className={cn(
+                "flex items-center justify-between rounded-sm p-2 text-left hover:bg-gray-100 transition-colors",
+                sp.id === selectedId && "bg-gray-100",
+              )}
+            >
+              <span className="text-sm font-medium truncate">{sp.name}</span>
+              {sp.id === selectedId && (
+                <div className="bg-primary-500 w-2 h-2 rounded-full shrink-0" />
+              )}
+            </button>
+          ))}
+        </div>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
