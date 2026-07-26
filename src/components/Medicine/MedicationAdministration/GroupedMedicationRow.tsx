@@ -118,7 +118,7 @@ const IndividualMedicationRow: React.FC<{
                 <div>
                   {dosage && (
                     <div>
-                      <HighlightedDosage instruction={di}>
+                      <HighlightedDosage instruction={di} showIcon={true}>
                         {dosage}
                       </HighlightedDosage>
                       {parts.length > 0 && <span>, {parts.join(", ")}</span>}
@@ -359,7 +359,10 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
                         <div>
                           {dosage && (
                             <>
-                              <HighlightedDosage instruction={di}>
+                              <HighlightedDosage
+                                instruction={di}
+                                showIcon={true}
+                              >
                                 {dosage}
                               </HighlightedDosage>
                               {(freq || method) && (
