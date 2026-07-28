@@ -244,15 +244,18 @@ export const formatPatientAgeClinical = (
 
   // Full breakdown for tooltip
   const tooltipParts: string[] = [];
-  if (years > 0) tooltipParts.push(`${years} ${t("years")}`);
-  if (months > 0) tooltipParts.push(`${months} ${t("months")}`);
-  if (days > 0) tooltipParts.push(`${days} ${t("days")}`);
-  const tooltip = tooltipParts.join(", ");
+  if (years > 0)
+    tooltipParts.push(`${years} ${t(years === 1 ? "year" : "years")}`);
+  if (months > 0)
+    tooltipParts.push(`${months} ${t(months === 1 ? "month" : "months")}`);
+  if (days > 0) tooltipParts.push(`${days} ${t(days === 1 ? "day" : "days")}`);
+  const tooltip =
+    tooltipParts.length > 0 ? tooltipParts.join(", ") : `0 ${t("days")}`;
 
   // 0–28 days: Days only
   if (totalDays <= 28) {
     return {
-      display: `${totalDays} ${t("days")}`,
+      display: `${totalDays} ${t(totalDays === 1 ? "day" : "days")}`,
       tooltip,
     };
   }
@@ -262,8 +265,9 @@ export const formatPatientAgeClinical = (
     const weeks = Math.floor(totalDays / 7);
     const remainingDays = totalDays % 7;
     const parts: string[] = [];
-    if (weeks > 0) parts.push(`${weeks} ${t("weeks")}`);
-    if (remainingDays > 0) parts.push(`${remainingDays} ${t("days")}`);
+    if (weeks > 0) parts.push(`${weeks} ${t(weeks === 1 ? "week" : "weeks")}`);
+    if (remainingDays > 0)
+      parts.push(`${remainingDays} ${t(remainingDays === 1 ? "day" : "days")}`);
     return {
       display: parts.join(" "),
       tooltip,
@@ -275,8 +279,10 @@ export const formatPatientAgeClinical = (
     const totalMonths = end.diff(start, "months");
     const remainingDays = end.diff(start.add(totalMonths, "months"), "days");
     const parts: string[] = [];
-    if (totalMonths > 0) parts.push(`${totalMonths} ${t("months")}`);
-    if (remainingDays > 0) parts.push(`${remainingDays} ${t("days")}`);
+    if (totalMonths > 0)
+      parts.push(`${totalMonths} ${t(totalMonths === 1 ? "month" : "months")}`);
+    if (remainingDays > 0)
+      parts.push(`${remainingDays} ${t(remainingDays === 1 ? "day" : "days")}`);
     return {
       display: parts.join(" "),
       tooltip,
@@ -286,8 +292,9 @@ export const formatPatientAgeClinical = (
   // 2 years to 18 years: Years + Months
   if (years < 18) {
     const parts: string[] = [];
-    parts.push(`${years} ${t("years")}`);
-    if (months > 0) parts.push(`${months} ${t("months")}`);
+    parts.push(`${years} ${t(years === 1 ? "year" : "years")}`);
+    if (months > 0)
+      parts.push(`${months} ${t(months === 1 ? "month" : "months")}`);
     return {
       display: parts.join(" "),
       tooltip,
@@ -296,7 +303,7 @@ export const formatPatientAgeClinical = (
 
   // Above 18 years: Years only
   return {
-    display: `${years} ${t("years")}`,
+    display: `${years} ${t(years === 1 ? "year" : "years")}`,
     tooltip,
   };
 };
