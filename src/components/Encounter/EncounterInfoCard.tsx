@@ -28,7 +28,11 @@ import {
 } from "@/types/emr/encounter/encounter";
 import { LocationTypeIcons } from "@/types/location/location";
 import { getLocationPath } from "@/types/location/utils";
-import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
+import {
+  formatDateTime,
+  formatName,
+  formatPatientAgeClinical,
+} from "@/Utils/utils";
 import { Clock, Stethoscope } from "lucide-react";
 
 export interface EncounterInfoCardProps {
@@ -47,6 +51,9 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
   const visibleTags = encounterTags.slice(0, 2); // Show first 2 tags
   const remainingCount = encounterTags.length - 2;
 
+  // Get clinical age format
+  const patientAge = formatPatientAgeClinical(encounter.patient);
+
   return (
     <Card
       data-status={encounter.status}
@@ -64,8 +71,13 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
                 {encounter.patient.name}
               </h3>
               <p className="text-sm text-gray-700">
-                {formatPatientAge(encounter.patient, true)},{" "}
-                {t(`GENDER__${encounter.patient.gender}`)}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="cursor-help">{patientAge.display}</span>
+                  </TooltipTrigger>
+                  <TooltipContent>{patientAge.tooltip}</TooltipContent>
+                </Tooltip>
+                , {t(`GENDER__${encounter.patient.gender}`)}
               </p>
             </div>
             <div className="flex flex-wrap gap-2 shrink-0">

@@ -183,6 +183,125 @@ export const formatPatientAge = (
 };
 
 /**
+ * Get patient age breakdown as years, months, and days.
+ * Used for displaying full age breakdown in tooltips.
+ *
+ * @param obj - Patient object
+ * @returns Object with years, months, and days
+ */
+export const getPatientAgeBreakdown = (
+  obj: PatientRead | PatientListRead | PublicPatientRead,
+): { years: number; months: number; days: number } => {
+  const start = dayjs(
+    obj.date_of_birth
+      ? new Date(obj.date_of_birth)
+      : new Date(obj.year_of_birth!, 0, 1),
+  );
+
+  const end =
+    "deceased_datetime" in obj && obj.deceased_datetime
+      ? dayjs(new Date(obj.deceased_datetime))
+      : dayjs(new Date());
+
+  const years = end.diff(start, "years");
+  const months = end.diff(start.add(years, "years"), "months");
+  const days = end.diff(
+    start.add(years, "years").add(months, "months"),
+    "days",
+  );
+
+  return { years, months, days };
+};
+
+/**
+ * Format patient age using clinical age-format rules.
+ * - 0–28 days: Days
+ * - 29 days to 1 year: Weeks + Days
+ * - 1 year to 2 years: Months + Days
+ * - 2 years to 18 years: Years + Months
+ * - Above 18 years: Years
+ *
+ * @param obj - Patient object
+ * @returns Object with formatted age and full breakdown for tooltip
+ */
+export const formatPatientAgeClinical = (
+  obj: PatientRead | PatientListRead | PublicPatientRead,
+): { display: string; tooltip: string } => {
+  // Skip if we don't have date of birth
+  if (!obj.date_of_birth) {
+    const fallback = `${t("born")} ${obj.year_of_birth}`;
+    return { display: fallback, tooltip: fallback };
+  }
+
+  const start = dayjs(new Date(obj.date_of_birth));
+  const end =
+    "deceased_datetime" in obj && obj.deceased_datetime
+      ? dayjs(new Date(obj.deceased_datetime))
+      : dayjs(new Date());
+
+  const totalDays = end.diff(start, "days");
+  const { years, months, days } = getPatientAgeBreakdown(obj);
+
+  // Full breakdown for tooltip
+  const tooltipParts: string[] = [];
+  if (years > 0) tooltipParts.push(`${years} ${t("years")}`);
+  if (months > 0) tooltipParts.push(`${months} ${t("months")}`);
+  if (days > 0) tooltipParts.push(`${days} ${t("days")}`);
+  const tooltip = tooltipParts.join(", ");
+
+  // 0–28 days: Days only
+  if (totalDays <= 28) {
+    return {
+      display: `${totalDays} ${t("days")}`,
+      tooltip,
+    };
+  }
+
+  // 29 days to 1 year: Weeks + Days
+  if (years === 0) {
+    const weeks = Math.floor(totalDays / 7);
+    const remainingDays = totalDays % 7;
+    const parts: string[] = [];
+    if (weeks > 0) parts.push(`${weeks} ${t("weeks")}`);
+    if (remainingDays > 0) parts.push(`${remainingDays} ${t("days")}`);
+    return {
+      display: parts.join(" "),
+      tooltip,
+    };
+  }
+
+  // 1 year to 2 years: Months + Days
+  if (years < 2) {
+    const totalMonths = end.diff(start, "months");
+    const remainingDays = end.diff(start.add(totalMonths, "months"), "days");
+    const parts: string[] = [];
+    if (totalMonths > 0) parts.push(`${totalMonths} ${t("months")}`);
+    if (remainingDays > 0) parts.push(`${remainingDays} ${t("days")}`);
+    return {
+      display: parts.join(" "),
+      tooltip,
+    };
+  }
+
+  // 2 years to 18 years: Years + Months
+  if (years < 18) {
+    const parts: string[] = [];
+    parts.push(`${years} ${t("years")}`);
+    if (months > 0) parts.push(`${months} ${t("months")}`);
+    return {
+      display: parts.join(" "),
+      tooltip,
+    };
+  }
+
+  // Above 18 years: Years only
+  return {
+    display: `${years} ${t("years")}`,
+    tooltip,
+  };
+};
+
+/**
  * A utility method to format an array of string to human readable format.
  *
  * @param values Array of strings to be made human readable.
