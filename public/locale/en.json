@@ -1716,7 +1716,8 @@
   "dates_and_identifiers": "Dates & Identifiers",
   "datetime": "Date/Time",
   "day": "Day",
-  "days": "Days",
+  "days": "days",
+  "day": "day",
   "days_supply": "Days Supply",
   "death_date_must_be_after_dob": "Death date must be after date of birth",
   "debit_card": "Debit Card",
@@ -6619,6 +6620,7 @@
   "year_of_birth_format": "Year of birth must be in YYYY format",
   "year_of_birth_must_be_present": "Year of birth must be present",
   "years": "years",
+  "year": "year",
   "years_of_experience": "Years of Experience",
   "years_of_experience_of_the_doctor": "Years of Experience of the Doctor",
   "yes": "Yes",
@@ -6632,5 +6634,10 @@
   "your_request_order_list": "Your Request Order List",
   "zoom_in": "Zoom In",
   "zoom_out": "Zoom Out",
-  "℞": "℞"
+  "℞": "℞",
+  "weeks": "weeks",
+  "week": "week",
+  "months": "months",
+  "month": "month",
+  "born": "Born"
 }
