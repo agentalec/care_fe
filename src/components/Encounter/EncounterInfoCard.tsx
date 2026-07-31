@@ -28,7 +28,12 @@ import {
 } from "@/types/emr/encounter/encounter";
 import { LocationTypeIcons } from "@/types/location/location";
 import { getLocationPath } from "@/types/location/utils";
-import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
+import {
+  formatDateTime,
+  formatName,
+  formatPatientAge,
+  formatPatientAgeTooltip,
+} from "@/Utils/utils";
 import { Clock, Stethoscope } from "lucide-react";
 
 export interface EncounterInfoCardProps {
@@ -64,8 +69,15 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
                 {encounter.patient.name}
               </h3>
               <p className="text-sm text-gray-700">
-                {formatPatientAge(encounter.patient, true)},{" "}
-                {t(`GENDER__${encounter.patient.gender}`)}
+                <Tooltip>
+                  <TooltipTrigger className="cursor-default">
+                    {formatPatientAge(encounter.patient, true)}
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {formatPatientAgeTooltip(encounter.patient, false)}
+                  </TooltipContent>
+                </Tooltip>
+                , {t(`GENDER__${encounter.patient.gender}`)}
               </p>
             </div>
             <div className="flex flex-wrap gap-2 shrink-0">
