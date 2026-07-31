@@ -294,7 +294,7 @@ export const formatPatientAge = (
   }
 
   // 2 years to 18 years: Show years + months
-  if (years < 18) {
+  if (years <= 18) {
     if (months === 0) {
       return `${years} ${getRelativeDateSuffix(years, "year", abbreviated)}`;
     }
