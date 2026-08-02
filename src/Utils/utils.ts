@@ -140,9 +140,45 @@ export const isValidLongitude = (longitude: number) => {
 const getRelativeDateSuffix = (abbreviated: boolean) => {
   return {
     day: abbreviated ? "d" : "days",
+    week: abbreviated ? "w" : "weeks",
     month: abbreviated ? "mo" : "months",
     year: abbreviated ? "Y" : "years",
   };
+};
+
+/**
+ * Get the full age breakdown in years, months, and days.
+ * Used for tooltip display.
+ */
+export const getFullAgeBreakdown = (
+  obj: PatientRead | PatientListRead | PublicPatientRead,
+  abbreviated = false,
+) => {
+  const suffixes = getRelativeDateSuffix(abbreviated);
+  const start = dayjs(
+    obj.date_of_birth
+      ? new Date(obj.date_of_birth)
+      : new Date(obj.year_of_birth!, 0, 1),
+  );
+
+  const end =
+    "deceased_datetime" in obj && obj.deceased_datetime
+      ? dayjs(new Date(obj.deceased_datetime))
+      : dayjs(new Date());
+
+  const years = end.diff(start, "years");
+  const months = end.diff(start.add(years, "years"), "months");
+  const days = end.diff(
+    start.add(years, "years").add(months, "months"),
+    "days",
+  );
+
+  const parts = [];
+  if (years > 0) parts.push(`${years} ${suffixes.year}`);
+  if (months > 0) parts.push(`${months} ${suffixes.month}`);
+  if (days > 0) parts.push(`${days} ${suffixes.day}`);
+
+  return parts.join(" ");
 };
 
 export const formatPatientAge = (
@@ -161,11 +197,6 @@ export const formatPatientAge = (
       ? dayjs(new Date(obj.deceased_datetime))
       : dayjs(new Date());
 
-  const years = end.diff(start, "years");
-  if (years) {
-    return `${years} ${suffixes.year}`;
-  }
-
   // Skip representing as no. of months/days if we don't know the date of birth
   // since it would anyways be inaccurate.
   if (!obj.date_of_birth) {
@@ -174,12 +205,36 @@ export const formatPatientAge = (
       : `Born on ${obj.year_of_birth}`;
   }
 
-  const month = end.diff(start, "month");
-  const day = end.diff(start.add(month, "month"), "day");
-  if (month) {
-    return `${month}${suffixes.month} ${day}${suffixes.day}`;
+  const totalDays = end.diff(start, "days");
+  const years = end.diff(start, "years");
+
+  // Above 18 years: Years only
+  if (years >= 18) {
+    return `${years} ${suffixes.year}`;
   }
-  return `${day}${suffixes.day}`;
+
+  // 2 years to 18 years: Years + Months
+  if (years >= 2) {
+    const months = end.diff(start.add(years, "years"), "months");
+    return `${years} ${suffixes.year} ${months} ${suffixes.month}`;
+  }
+
+  // 1 year to 2 years: Months + Days
+  if (years >= 1) {
+    const totalMonths = end.diff(start, "months");
+    const days = end.diff(start.add(totalMonths, "months"), "days");
+    return `${totalMonths} ${suffixes.month} ${days} ${suffixes.day}`;
+  }
+
+  // 29 days to 1 year: Weeks + Days
+  if (totalDays >= 29) {
+    const weeks = Math.floor(totalDays / 7);
+    const days = totalDays % 7;
+    return `${weeks} ${suffixes.week} ${days} ${suffixes.day}`;
+  }
+
+  // 0–28 days: Days only
+  return `${totalDays} ${suffixes.day}`;
 };
 
 /**
