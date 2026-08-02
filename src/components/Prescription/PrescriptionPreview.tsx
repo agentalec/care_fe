@@ -15,6 +15,7 @@ import {
   formatDuration,
   formatFrequencyWithInstructions,
   formatSig,
+  isNonStandardDosage,
 } from "@/components/Medicine/utils";
 
 import query from "@/Utils/request/query";
@@ -40,6 +41,33 @@ const PrescriptionContent = ({
   const medications = prescription.medications;
   const { t } = useTranslation();
 
+  // Flatten all instructions for lookup by index
+  const allInstructions = medications.flatMap(
+    (medication) => medication.dosage_instruction,
+  );
+
+  // Compute rows with instruction indices
+  let instructionIndex = 0;
+  const tableRows = medications.flatMap((medication) => {
+    const instructions = medication.dosage_instruction;
+    const isMulti = instructions.length > 1;
+    return instructions.map((di, idx) => {
+      const currentIndex = instructionIndex++;
+      return {
+        _groupedRow:
+          isMulti && idx < instructions.length - 1 ? "true" : undefined,
+        _instructionIndex: String(currentIndex), // Store index as string
+        medicine: idx === 0 ? displayMedicationName(medication) : "",
+        dosage: formatDosage(di) || "-",
+        frequency: formatFrequencyWithInstructions(di) || "-",
+        duration: formatDuration(di) || "-",
+        instructions: [formatSig(di), idx === 0 ? medication.note : ""]
+          .filter(Boolean)
+          .join("\n"),
+      };
+    });
+  });
+
   return (
     <div>
       {/* Prescription Symbol */}
@@ -62,25 +90,28 @@ const PrescriptionContent = ({
               { key: "duration" },
               { key: "instructions" },
             ]}
-            rows={medications.flatMap((medication) => {
-              const instructions = medication.dosage_instruction;
-              const isMulti = instructions.length > 1;
-              return instructions.map((di, idx) => ({
-                _groupedRow:
-                  isMulti && idx < instructions.length - 1 ? "true" : undefined,
-                medicine: idx === 0 ? displayMedicationName(medication) : "",
-                dosage: formatDosage(di) || "-",
-                frequency: formatFrequencyWithInstructions(di) || "-",
-                duration: formatDuration(di) || "-",
-                instructions: [formatSig(di), idx === 0 ? medication.note : ""]
-                  .filter(Boolean)
-                  .join("\n"),
-              }));
-            })}
+            rows={tableRows}
             className="text-sm break-words font-semibold whitespace-break-spaces text-gray-950"
             cellConfig={{
               medicine: { className: "text-left" },
               frequency: { className: "text-left" },
+            }}
+            renderCell={(key, value, rowIndex) => {
+              if (key === "dosage") {
+                const row = tableRows[rowIndex];
+                const instructionIdx = row?._instructionIndex
+                  ? parseInt(row._instructionIndex, 10)
+                  : -1;
+                const instruction =
+                  instructionIdx >= 0 ? allInstructions[instructionIdx] : null;
+                const shouldBold = instruction
+                  ? isNonStandardDosage(instruction)
+                  : false;
+                return (
+                  <span className={shouldBold ? "font-bold" : ""}>{value}</span>
+                );
+              }
+              return value;
             }}
             rowClassName={(row) => (row._groupedRow ? "border-b-0" : undefined)}
           />

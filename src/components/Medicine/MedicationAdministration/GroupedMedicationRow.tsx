@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/tooltip";
 
 import { DosageInstructionList } from "@/components/Medicine/DosageInstructionList";
+import { HighlightedDosage } from "@/components/Medicine/HighlightedDosage";
 import { formatDosage, formatFrequency } from "@/components/Medicine/utils";
 
 import { MedicationAdministrationRead } from "@/types/emr/medicationAdministration/medicationAdministration";
@@ -118,7 +119,15 @@ const IndividualMedicationRow: React.FC<{
                 .join(", ");
               return (
                 <div>
-                  {text && <div>{text}</div>}
+                  {text && (
+                    <div>
+                      <HighlightedDosage instruction={di}>
+                        {formatDosage(di)}
+                      </HighlightedDosage>
+                      {formatFrequency(di) && `, ${formatFrequency(di)}`}
+                      {di.method?.display && `, ${di.method.display}`}
+                    </div>
+                  )}
                   {di.route?.display && (
                     <Badge variant="blue" className="text-xs mt-0.5">
                       {di.route.display}
@@ -350,7 +359,9 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
                     return (
                       <div>
                         <div>
-                          {formatDosage(di)}
+                          <HighlightedDosage instruction={di}>
+                            {formatDosage(di)}
+                          </HighlightedDosage>
                           {freq && <span className="text-gray-400"> · </span>}
                           {freq}
                           {di.method?.display && (

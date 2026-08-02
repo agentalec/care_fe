@@ -21,6 +21,7 @@ import {
 } from "@/types/emr/medicationRequest/medicationRequest";
 
 import { DosageInstructionList } from "./DosageInstructionList";
+import { HighlightedDosage } from "./HighlightedDosage";
 import {
   formatDosage,
   formatDuration,
@@ -103,7 +104,11 @@ export const MedicationsTable = ({
                   <TableCell className="py-2 px-3 break-words whitespace-normal">
                     <DosageInstructionList
                       instructions={instructions}
-                      renderItem={(di) => formatDosage(di) || "-"}
+                      renderItem={(di) => (
+                        <HighlightedDosage instruction={di}>
+                          {formatDosage(di) || "-"}
+                        </HighlightedDosage>
+                      )}
                     />
                   </TableCell>
                   <TableCell className="py-2 px-3 break-words whitespace-normal">
