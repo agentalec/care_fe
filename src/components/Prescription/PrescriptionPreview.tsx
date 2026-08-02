@@ -108,9 +108,7 @@ const PrescriptionContent = ({
                   ? isNonStandardDosage(instruction)
                   : false;
                 return (
-                  <span className={shouldBold ? "font-bold" : ""}>
-                    {value}
-                  </span>
+                  <span className={shouldBold ? "font-bold" : ""}>{value}</span>
                 );
               }
               return value;

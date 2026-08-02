@@ -9,8 +9,8 @@ import { round } from "@/Utils/decimal";
 
 /**
  * Determines if a dosage instruction has a non-standard dose (not equal to 1).
- * Returns true if the dose_quantity value is not "1", or if dose_range has
- * either low or high value not equal to "1".
+ * Returns true if the dose_quantity value is not numerically equal to 1, or if
+ * dose_range has either low or high value not numerically equal to 1.
  */
 export function isNonStandardDosage(
   instruction?: MedicationRequestDosageInstruction,
@@ -20,11 +20,14 @@ export function isNonStandardDosage(
   const { dose_range, dose_quantity } = instruction.dose_and_rate;
 
   if (dose_range) {
-    // Highlight if either low or high is not "1"
-    return dose_range.low.value !== "1" || dose_range.high.value !== "1";
+    // Highlight if either low or high is not numerically equal to 1
+    return (
+      parseFloat(dose_range.low.value) !== 1 ||
+      parseFloat(dose_range.high.value) !== 1
+    );
   } else if (dose_quantity) {
-    // Highlight if value is not "1"
-    return dose_quantity.value !== "1";
+    // Highlight if value is not numerically equal to 1
+    return parseFloat(dose_quantity.value) !== 1;
   }
 
   return false;
