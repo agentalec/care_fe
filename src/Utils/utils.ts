@@ -173,12 +173,8 @@ export const getFullAgeBreakdown = (
     "days",
   );
 
-  const parts = [];
-  if (years > 0) parts.push(`${years} ${suffixes.year}`);
-  if (months > 0) parts.push(`${months} ${suffixes.month}`);
-  if (days > 0) parts.push(`${days} ${suffixes.day}`);
-
-  return parts.join(" ");
+  // Always include all three units for complete breakdown
+  return `${years} ${suffixes.year} ${months} ${suffixes.month} ${days} ${suffixes.day}`;
 };
 
 export const formatPatientAge = (
