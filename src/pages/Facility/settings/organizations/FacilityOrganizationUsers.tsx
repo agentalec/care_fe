@@ -160,7 +160,7 @@ export default function FacilityOrganizationUsers({
                 <UserCard
                   key={userRole.user.id}
                   user={userRole.user}
-                  roleName={userRole.role.name}
+                  roleName={t(userRole.role.name)}
                   facility={facilityId}
                   editRoleAction={
                     (isGeoAdmin || canManageFacilityOrganizationUsers) && (

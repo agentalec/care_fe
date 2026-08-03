@@ -213,7 +213,7 @@ export default function OrganizationUsers({
                       <UserCard
                         key={userRole.user.id}
                         user={userRole.user}
-                        roleName={userRole.role.name}
+                        roleName={t(userRole.role.name)}
                         editRoleAction={
                           canManageOrganizationUsers && (
                             <EditUserRoleSheet
