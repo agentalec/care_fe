@@ -124,7 +124,7 @@ export const ObservationHistoryTable = ({
                   </TableCell>
                   <TableCell>
                     {codes.find((c) => c.code === observation.main_code?.code)
-                      ?.display || observation.main_code?.code}
+                      ?.display || t("unknown")}
                   </TableCell>
                   <TableCell>{observation.value.value || "-"}</TableCell>
                   <TableCell>
