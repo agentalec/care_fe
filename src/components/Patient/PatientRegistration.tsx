@@ -202,7 +202,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     const isGeoOrgValid =
       data.geo_organization &&
       isGeoOrganizationValid(data.geo_organization, {
-        required: minGeoOrganizationLevelsRequired == null,
+        required: minGeoOrganizationLevelsRequired != null,
         requiredDepth: minGeoOrganizationLevelsRequired,
       });
 
@@ -895,7 +895,7 @@ const AdditionalDetailsContent = ({
                 <GovtOrganizationPicker
                   ref={field.ref}
                   aria-invalid={!!fieldState.error}
-                  required={minGeoOrganizationLevelsRequired == null}
+                  required={minGeoOrganizationLevelsRequired != null}
                   requiredDepth={minGeoOrganizationLevelsRequired}
                   value={form.watch("_selected_levels")[0] ?? null}
                   onChange={(organization) => {
@@ -907,7 +907,7 @@ const AdditionalDetailsContent = ({
                     const isValid =
                       !!organization &&
                       isGeoOrganizationValid(organization, {
-                        required: minGeoOrganizationLevelsRequired == null,
+                        required: minGeoOrganizationLevelsRequired != null,
                         requiredDepth: minGeoOrganizationLevelsRequired,
                       });
                     field.onChange(isValid ? organization.id : "");
