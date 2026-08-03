@@ -1,5 +1,11 @@
 import careConfig from "@careConfig";
-import { differenceInMinutes, endOfDay, format, startOfDay } from "date-fns";
+import {
+  differenceInCalendarDays,
+  differenceInMinutes,
+  endOfDay,
+  format,
+  startOfDay,
+} from "date-fns";
 import { toPng } from "html-to-image";
 import { t } from "i18next";
 
@@ -447,4 +453,22 @@ export const goBack = (fallback?: string) => {
     return navigate(fallback);
   }
   history.back();
+};
+
+/**
+ * Calculate length of stay in days for an encounter
+ * @param startDate - Encounter start date
+ * @param endDate - Encounter end date (if null, uses current date for open encounters)
+ * @returns Number of days between start and end (or today for open encounters)
+ */
+export const calculateLengthOfStay = (
+  startDate: string | Date | null | undefined,
+  endDate?: string | Date | null,
+): number | null => {
+  if (!startDate) return null;
+
+  const start = new Date(startDate);
+  const end = endDate ? new Date(endDate) : new Date();
+
+  return differenceInCalendarDays(end, start) + 1;
 };

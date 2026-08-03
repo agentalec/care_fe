@@ -37,7 +37,7 @@ import {
 import { PatientRead } from "@/types/emr/patient/patient";
 import { LocationTypeIcons } from "@/types/location/location";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
-import { entriesOf, goBack } from "@/Utils/utils";
+import { calculateLengthOfStay, entriesOf, goBack } from "@/Utils/utils";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -331,6 +331,18 @@ export const EncounterShow = (props: Props) => {
                           {t("ongoing")}
                         </span>
                       )}
+                      {selectedEncounter.encounter_class === "imp" &&
+                        (() => {
+                          const los = calculateLengthOfStay(
+                            selectedEncounter.period.start,
+                            selectedEncounter.period.end,
+                          );
+                          return los !== null ? (
+                            <span className="ml-1">
+                              ({los} {los === 1 ? t("day") : t("days")})
+                            </span>
+                          ) : null;
+                        })()}
                     </span>
                   </div>
 
