@@ -82,13 +82,14 @@ interface QParams {
   phone_number?: string;
   flow?: "dispense";
   createEncounter?: "true";
+  section?: string;
 }
 
 export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
   useShortcutSubContext();
   const { t } = useTranslation();
   const { facility, facilityId } = useCurrentFacility();
-  const [{ phone_number, flow }] = useQueryParams<QParams>();
+  const [{ phone_number, flow, section }] = useQueryParams<QParams>();
 
   const [suppressDuplicateWarning, setSuppressDuplicateWarning] =
     useState(!!patientId);
@@ -306,6 +307,22 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     t("unsaved_changes"),
   );
 
+  useEffect(() => {
+    if (section === "general-info" && !patientQuery.isLoading) {
+      setTimeout(() => {
+        const additionalDetailsSection = document.querySelector(
+          '[data-state="open"][data-value="additional-details"]',
+        );
+        if (additionalDetailsSection) {
+          additionalDetailsSection.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        }
+      }, 100);
+    }
+  }, [section, patientQuery.isLoading]);
+
   if (patientId && patientQuery.isLoading) {
     return <Loading />;
   }
@@ -398,7 +415,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
               type="multiple"
               className="flex flex-col gap-6"
               defaultValue={
-                quickRegistration
+                quickRegistration && section !== "general-info"
                   ? ["patient-basics"]
                   : ["patient-basics", "additional-details"]
               }
