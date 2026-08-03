@@ -130,8 +130,29 @@ export function SmartExternalDeliveryRow({
         e.preventDefault();
         onSubmit?.();
       } else {
-        // Plain Enter: prevent form submission, allow default focus behavior
+        // Plain Enter: prevent form submission and move to next field
         e.preventDefault();
+        const target = e.currentTarget;
+        const form = target.form;
+        if (form) {
+          const formElements = Array.from(form.elements) as HTMLElement[];
+          const currentIndex = formElements.indexOf(target);
+          // Find next focusable element
+          for (let i = currentIndex + 1; i < formElements.length; i++) {
+            const element = formElements[i];
+            if (
+              element instanceof HTMLInputElement ||
+              element instanceof HTMLTextAreaElement ||
+              element instanceof HTMLSelectElement ||
+              element instanceof HTMLButtonElement
+            ) {
+              if (!element.disabled && element.tabIndex >= 0) {
+                element.focus();
+                break;
+              }
+            }
+          }
+        }
       }
     }
   };
