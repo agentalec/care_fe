@@ -470,5 +470,5 @@ export const calculateLengthOfStay = (
   const start = new Date(startDate);
   const end = endDate ? new Date(endDate) : new Date();
 
-  return differenceInCalendarDays(end, start);
+  return differenceInCalendarDays(end, start) + 1;
 };
