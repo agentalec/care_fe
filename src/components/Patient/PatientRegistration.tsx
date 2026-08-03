@@ -198,6 +198,14 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
       };
     };
 
+    // Validate geo_organization using the same logic as onChange handler
+    const isGeoOrgValid =
+      data.geo_organization &&
+      isGeoOrganizationValid(data.geo_organization, {
+        required: minGeoOrganizationLevelsRequired == null,
+        requiredDepth: minGeoOrganizationLevelsRequired,
+      });
+
     // Reset the form with the patient data
     form.reset({
       name: data.name || "",
@@ -219,7 +227,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
       permanent_address: data.permanent_address || "",
       permanent_address_same_as_address:
         data.address === data.permanent_address,
-      geo_organization: data.geo_organization?.id || "",
+      geo_organization: isGeoOrgValid ? data.geo_organization.id : "",
       pincode: data.pincode || undefined,
 
       is_deceased: !!data.deceased_datetime,
