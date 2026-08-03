@@ -28,7 +28,12 @@ import {
 } from "@/types/emr/encounter/encounter";
 import { LocationTypeIcons } from "@/types/location/location";
 import { getLocationPath } from "@/types/location/utils";
-import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
+import {
+  calculateLengthOfStay,
+  formatDateTime,
+  formatName,
+  formatPatientAge,
+} from "@/Utils/utils";
 import { Clock, Stethoscope } from "lucide-react";
 
 export interface EncounterInfoCardProps {
@@ -46,6 +51,11 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
   const encounterTags = encounter.tags || [];
   const visibleTags = encounterTags.slice(0, 2); // Show first 2 tags
   const remainingCount = encounterTags.length - 2;
+
+  const lengthOfStay =
+    encounter.encounter_class === "imp"
+      ? calculateLengthOfStay(encounter.period.start, encounter.period.end)
+      : null;
 
   return (
     <Card
@@ -88,6 +98,11 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
               formatDateTime(encounter.period.start, "DD/MM/YYYY, hh:mm A")}
             {encounter.period.end &&
               ` - ${formatDateTime(encounter.period.end, "DD/MM/YYYY, hh:mm A")}`}
+            {lengthOfStay !== null && (
+              <span className="ml-1">
+                ({lengthOfStay} {lengthOfStay === 1 ? t("day") : t("days")})
+              </span>
+            )}
           </span>
         </div>
 

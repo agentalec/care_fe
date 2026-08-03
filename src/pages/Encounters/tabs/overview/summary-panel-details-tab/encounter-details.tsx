@@ -16,6 +16,7 @@ import {
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { ENCOUNTER_PRIORITY_COLORS } from "@/types/emr/encounter/encounter";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import { calculateLengthOfStay } from "@/Utils/utils";
 
 export const EncounterDetails = () => {
   const { t } = useTranslation();
@@ -28,6 +29,11 @@ export const EncounterDetails = () => {
     actions: { markAsCompleted, dispense },
   } = useEncounter();
   if (!encounter) return <CardListSkeleton count={1} />;
+
+  const lengthOfStay =
+    encounter.encounter_class === "imp"
+      ? calculateLengthOfStay(encounter.period.start, encounter.period.end)
+      : null;
 
   return (
     <div className="flex flex-wrap gap-2 border bg-gray-100 border-gray-200 rounded-md pt-2 px-1 pb-1">
@@ -109,6 +115,19 @@ export const EncounterDetails = () => {
             </div>
           </div>
         </div>
+
+        {lengthOfStay !== null && (
+          <div className="md:flex flex-col gap-1">
+            <div>
+              <span className="text-sm font-medium text-gray-700">
+                {t("length_of_stay")}:
+              </span>
+              <div className="text-sm text-gray-950 font-semibold">
+                {lengthOfStay} {lengthOfStay === 1 ? t("day") : t("days")}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
       {canWriteSelectedEncounter && (
         <>
