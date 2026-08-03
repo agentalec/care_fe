@@ -151,6 +151,7 @@ export function UserCard(props: UserCardProps) {
 }
 export const UserGrid = ({ users }: { users?: UserReadMinimal[] }) => {
   const { facilityId } = usePathParams("/facility/:facilityId/*")!;
+  const { t } = useTranslation();
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -159,7 +160,7 @@ export const UserGrid = ({ users }: { users?: UserReadMinimal[] }) => {
           facility={facilityId}
           key={user.id}
           user={user}
-          roleName={user.user_type}
+          roleName={user.user_type ? t(user.user_type) : ""}
         />
       ))}
     </div>
@@ -217,7 +218,7 @@ const UserListRow = ({ user }: { user: UserReadMinimal }) => {
         <UserStatusIndicator user={user} addPadding />
       </td>
       <td id="role" className="px-10 py-4 text-sm">
-        {user.user_type}
+        {user.user_type ? t(user.user_type) : "-"}
       </td>
       <td id="contact" className="px-4 py-4 text-sm whitespace-nowrap">
         {user.phone_number ? formatPhoneNumberIntl(user.phone_number) : "-"}
