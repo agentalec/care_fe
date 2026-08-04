@@ -29,7 +29,11 @@ import PaginationComponent from "@/components/Common/Pagination";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
-import { TooltipComponent } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
 import { LocationRead } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
@@ -88,19 +92,21 @@ export function LocationSwitcher() {
             <div className="flex min-w-0 items-center gap-2">
               <MapPinIcon className="size-5 text-green-600" />
               <div className="min-w-0 flex-1">
-                <TooltipComponent
-                  content={location?.name}
-                  className="hidden lg:block max-w-xs"
-                >
-                  <div className="flex min-w-0 flex-col items-start">
-                    <span className="text-xs text-gray-500">
-                      {t("current_location")}
-                    </span>
-                    <span className="w-full truncate text-left text-sm font-medium text-gray-900">
+                <div className="flex min-w-0 flex-col items-start">
+                  <span className="text-xs text-gray-500">
+                    {t("current_location")}
+                  </span>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="w-full truncate text-left text-sm font-medium text-gray-900">
+                        {location?.name}
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent side="right" className="hidden lg:block">
                       {location?.name}
-                    </span>
-                  </div>
-                </TooltipComponent>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
               </div>
             </div>
             <CareIcon icon="l-sort" />
