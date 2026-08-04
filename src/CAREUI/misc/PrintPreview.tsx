@@ -50,11 +50,13 @@ export default function PrintPreview(props: Props) {
   const { t } = useTranslation();
   useShortcutSubContext();
 
+  const facilityAutoPrintSetting = props.facility?.auto_print_invoices ?? true;
+  const templateAutoPrint = props.facility
+    ? resolvePrintTemplate(props.facility, props.templateSlug)?.print_setup
+        ?.auto_print
+    : undefined;
   const autoPrintEnabled =
-    (props.facility
-      ? resolvePrintTemplate(props.facility, props.templateSlug)?.print_setup
-          ?.auto_print
-      : undefined) ?? false;
+    facilityAutoPrintSetting && (templateAutoPrint ?? false);
 
   const [imagesReady, setImagesReady] = useState(false);
   const printSectionRef = useRef<HTMLDivElement>(null);

@@ -71,6 +71,7 @@ export default function FacilityForm({
       .coordinates.longitude.transform((val) => (val ? Number(val) : undefined))
       .optional(),
     is_public: z.boolean().default(false),
+    auto_print_invoices: z.boolean().default(true),
   });
 
   type FacilityFormValues = z.infer<typeof facilityFormSchema>;
@@ -89,6 +90,7 @@ export default function FacilityForm({
       latitude: undefined,
       longitude: undefined,
       is_public: true,
+      auto_print_invoices: true,
     },
   });
 
@@ -211,6 +213,7 @@ export default function FacilityForm({
           ? Number(facilityData.longitude)
           : undefined,
         is_public: facilityData.is_public,
+        auto_print_invoices: facilityData.auto_print_invoices ?? true,
       });
     }
   }, [facilityData, form]);
@@ -426,6 +429,34 @@ export default function FacilityForm({
                   </FormLabel>
                   <p className="text-sm text-gray-500">
                     {t("make_facility_public_description")}
+                  </p>
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Print Settings */}
+        <div className="space-y-4 rounded-lg border border-gray-200 p-4">
+          <h3 className="text-lg font-medium">{t("print_settings")}</h3>
+          <FormField
+            control={form.control}
+            name="auto_print_invoices"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-gray-200 p-4">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel className="text-base">
+                    {t("auto_print_invoices_after_payment")}
+                  </FormLabel>
+                  <p className="text-sm text-gray-500">
+                    {t("auto_print_invoices_after_payment_description")}
                   </p>
                 </div>
                 <FormMessage />
