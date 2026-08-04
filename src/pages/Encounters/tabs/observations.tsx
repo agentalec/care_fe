@@ -158,7 +158,7 @@ export const EncounterObservationsTab = () => {
                         </div>
                       )}
                       <div className="font-medium text-sm text-gray-600">
-                        {item.main_code?.display || t("unknown")}
+                        {item.main_code?.display || item.main_code?.code || t("unknown")}
                       </div>
                       {item.data_entered_by && (
                         <div className="text-gray-600 text-sm">
