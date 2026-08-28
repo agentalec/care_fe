@@ -6777,5 +6777,8 @@
   "your_request_order_list": "Your Request Order List",
   "zoom_in": "Zoom In",
   "zoom_out": "Zoom Out",
-  "℞": "℞"
+  "℞": "℞",
+  "print_settings": "Print Settings",
+  "auto_print_invoices_after_payment": "Auto-print invoices after payment",
+  "auto_print_invoices_after_payment_description": "When enabled, invoice print dialog will open automatically after recording payment"
 }

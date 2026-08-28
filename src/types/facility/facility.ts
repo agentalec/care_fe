@@ -57,6 +57,7 @@ export interface FacilityRead extends FacilityBase, FacilityPermissions {
   patient_facility_identifier_configs: PatientIdentifierConfig[];
   features: number[];
   print_templates: PrintTemplate[];
+  auto_print_invoices?: boolean;
 }
 
 export type FacilityListRead = Omit<
