@@ -62,6 +62,8 @@ interface Props {
   /** Location ID for fetching inventory (origin location for internal transfers) */
   locationId?: string;
   onRemove?: () => void;
+  /** Handler to submit the form */
+  onSubmit?: () => void;
 }
 
 export function SmartExternalDeliveryRow({
@@ -73,6 +75,7 @@ export function SmartExternalDeliveryRow({
   processedExtensions,
   locationId,
   onRemove,
+  onSubmit,
 }: Props) {
   const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
@@ -118,6 +121,40 @@ export function SmartExternalDeliveryRow({
   const handleProductSelect = (product: ProductRead) => {
     fillFromProduct(product);
     setBatchSelectorOpen(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      if (e.shiftKey) {
+        // Shift+Enter: submit the form
+        e.preventDefault();
+        onSubmit?.();
+      } else {
+        // Plain Enter: prevent form submission and move to next field
+        e.preventDefault();
+        const target = e.currentTarget;
+        const form = target.form;
+        if (form) {
+          const formElements = Array.from(form.elements) as HTMLElement[];
+          const currentIndex = formElements.indexOf(target);
+          // Find next focusable element
+          for (let i = currentIndex + 1; i < formElements.length; i++) {
+            const element = formElements[i];
+            if (
+              element instanceof HTMLInputElement ||
+              element instanceof HTMLTextAreaElement ||
+              element instanceof HTMLSelectElement ||
+              element instanceof HTMLButtonElement
+            ) {
+              if (!element.disabled && element.tabIndex >= 0) {
+                element.focus();
+                break;
+              }
+            }
+          }
+        }
+      }
+    }
   };
 
   const getExpirationDisplay = (product: ProductRead) => {
@@ -435,6 +472,7 @@ export function SmartExternalDeliveryRow({
                   min={1}
                   {...field}
                   onChange={(e) => field.onChange(e.target.value)}
+                  onKeyDown={handleKeyDown}
                   className="w-32"
                   disabled
                 />
@@ -462,6 +500,7 @@ export function SmartExternalDeliveryRow({
                 setField("unit_price", e.target.value);
                 markAsEdited();
               }}
+              onKeyDown={handleKeyDown}
               disabled={!productKnowledge || isTaxInclusive}
               className={cn(
                 "w-[90px]",

@@ -593,6 +593,10 @@ export function AddSupplyDeliveryForm({
     }
   }
 
+  const handleFormSubmit = () => {
+    form.handleSubmit(onSubmit)();
+  };
+
   return (
     <>
       <DisablingCover disabled={isProcessing} message={t("saving")}>
@@ -889,6 +893,7 @@ export function AddSupplyDeliveryForm({
                                 processedExtensions={processedExtensions}
                                 locationId={destination}
                                 onRemove={() => remove(index)}
+                                onSubmit={handleFormSubmit}
                               />
                             ),
                           )}
