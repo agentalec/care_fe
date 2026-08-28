@@ -353,6 +353,76 @@ test.describe("Patient Registration", () => {
       `${expectedYearOfBirth} (${patientAge}y), Male`,
     );
   });
+
+  test("should allow saving patient profile without changing pre-existing 2-level government organization", async ({
+    page,
+  }) => {
+    const patientData = generatePatientData();
+    await startRegistration(page);
+    await fillRequiredFieldsAndSubmit(page, patientData);
+
+    // Wait for patient profile page to load
+    await page.waitForURL("**/patients/**");
+
+    // Navigate to update patient profile
+    await page
+      .getByRole("button", { name: /update/i })
+      .first()
+      .click();
+
+    // Wait for the form to load with existing data
+    await expect(page.getByRole("textbox", { name: /name.*\*/i })).toHaveValue(
+      patientData.name,
+    );
+
+    // Verify government organization selector shows 2 levels
+    await test.step("Verify organization levels are pre-filled", async () => {
+      const additionalDetailsSection = page.getByRole("button", {
+        name: "Additional Details",
+      });
+      const additionalDetailsSectionText =
+        await additionalDetailsSection.textContent();
+
+      // Expand if collapsed
+      if (additionalDetailsSectionText?.toLowerCase().includes("optional")) {
+        await additionalDetailsSection.click();
+      }
+
+      const geoRegion = page.getByRole("region", {
+        name: "Additional Details",
+      });
+      const comboboxes = geoRegion.getByRole("combobox");
+
+      // Should have at least 2 comboboxes filled (state + district)
+      const count = await comboboxes.count();
+      expect(count).toBeGreaterThanOrEqual(2);
+    });
+
+    // Make a small change to force form dirty state (not touching geo org)
+    await page
+      .getByRole("textbox", { name: /address/i })
+      .fill(`${patientData.address} - Updated`);
+
+    // Submit the update without touching the government organization selector
+    await test.step("Submit update without touching organization", async () => {
+      await page
+        .getByRole("button", { name: /update/i })
+        .last()
+        .click();
+
+      // Should succeed without validation error
+      await expect(
+        page
+          .locator("li[data-sonner-toast]")
+          .getByText(/patient updated successfully/i),
+      ).toBeVisible({ timeout: 15000 });
+
+      // Should NOT show organization validation error
+      await expect(
+        page.getByText(/atleast 2 levels geo-organization/i),
+      ).not.toBeVisible();
+    });
+  });
 });
 
 test.describe("DOB timezone validation", () => {
